@@ -49,11 +49,11 @@ struct SimulationData {
 namespace Scene {
 class Verlet : public Scene {
 private:
-    const unsigned int m_ObjCount = 1024/2;
+    static const unsigned int m_ObjCount = 512;
     VerletObject* m_Objs = new VerletObject[m_ObjCount];
     Mesh::Quad* m_Shapes = new Mesh::Quad[m_ObjCount];
     
-    BatchRenderer<Mesh::Quad, 1024> m_BatchRenderer;
+    BatchRenderer<Mesh::Quad, m_ObjCount> m_BatchRenderer;
 
     glm::vec2 gravity = {0, -3000};
     CircleConstraint m_Constraint;
@@ -77,18 +77,21 @@ public:
     void Start() override {
         glm::vec2 velocityDir(0);
         float iPercent = 0;
+        float theta = 0;
         for (unsigned int i=0; i<m_ObjCount; i++) {
             iPercent = (float)i/m_ObjCount;
             
             
             m_Objs[i].Mesh = &m_Shapes[i];
             m_Objs[i].Mesh->SetColor(iPercent, 1-(float)i/m_ObjCount, 1, 1);
-            // m_Objs[i].SetRadius(5 * (2.0f+sin(iPercent * PI * 40.0f)));
-            m_Objs[i].SetRadius(20);
+            m_Objs[i].SetRadius(5 * (2.0f+sin(iPercent * PI * 20.0f)));
+            // m_Objs[i].SetRadius(10);
             m_Objs[i].Mesh->SetCentre(m_Constraint.centre);
             
-            velocityDir = glm::vec2(cos(iPercent * -PI * 5), sin(iPercent * -PI * 5));
-            m_Objs[i].pos = m_Constraint.centre - glm::vec2(0.0f, m_Constraint.radius - m_Objs[i].GetRadius());
+            theta = -PI/2 + PI/2 * sin(iPercent * 2 * PI);
+            velocityDir = glm::vec2(cos(theta), sin(theta));
+            // velocityDir = glm::vec2(1, -0.2);
+            m_Objs[i].pos = m_Constraint.centre;// + glm::vec2(-200, 200);
             m_Objs[i].pos_old = m_Objs[i].pos - velocityDir*10.0f;
         }
         m_SimData.ObjSpawnRate = 100.0f;
@@ -143,8 +146,8 @@ public:
         Renderer::BasicBlend();
         Renderer::Clear(0, 0, 0, 1);
 
-        m_BatchRenderer.DrawBatches(m_SimData.EnabledObjCount);
-        // m_BatchRenderer.DrawBatches();
+        // m_BatchRenderer.DrawBatches(m_SimData.EnabledObjCount);
+        m_BatchRenderer.DrawBatches();
     }
     
 };}
