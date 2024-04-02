@@ -44,6 +44,9 @@ struct SimulationData {
     float Subdt = 0;
     float ObjSpawnRate = 0.1f;
     float SpawnTimer = 0;
+    float SpawnAngleRate = 2 * PI;
+    float SpawnAngle = PI/2;
+    float SpawnAngleDisplacement = 0;
 };
 
 namespace Scene {
@@ -75,6 +78,12 @@ public:
     }
 
     void Start() override {
+        m_SimData.ObjSpawnRate = 100.0f/2;
+        m_SimData.SubSteps = 8;
+        m_SimData.SpawnAngle = PI/1.5;
+        m_SimData.SpawnAngleRate = 8 * PI;
+        m_SimData.SpawnAngleDisplacement = -PI/6;
+        
         glm::vec2 velocityDir(0);
         float iPercent = 0;
         float theta = 0;
@@ -88,14 +97,12 @@ public:
             // m_Objs[i].SetRadius(10);
             m_Objs[i].Mesh->SetCentre(m_Constraint.centre);
             
-            theta = -PI/2 + PI/2 * sin(iPercent * 2 * PI);
+            theta = m_SimData.SpawnAngleDisplacement + m_SimData.SpawnAngle/2 * (sin(iPercent * m_SimData.SpawnAngleRate) - 1);
             velocityDir = glm::vec2(cos(theta), sin(theta));
             // velocityDir = glm::vec2(1, -0.2);
             m_Objs[i].pos = m_Constraint.centre;// + glm::vec2(-200, 200);
             m_Objs[i].pos_old = m_Objs[i].pos - velocityDir*10.0f;
         }
-        m_SimData.ObjSpawnRate = 100.0f;
-        m_SimData.SubSteps = 8;
     }
 
     void ConstrainObj(VerletObject& obj) {
